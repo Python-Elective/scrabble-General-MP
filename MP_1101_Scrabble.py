@@ -13,8 +13,7 @@ SCRABBLE_LETTER_VALUES = {
 # Helper code
 # (you don't need to understand this helper code)
 
-WORDLIST_FILENAME = "words.txt"
-
+WORDLIST_FILENAME = "C:/Users/phonl/Downloads/Scrabble early/Scrabble early/words.txt"
 
 def load_words():
     """
@@ -71,7 +70,13 @@ def get_word_score(word, n):
     n: integer (HAND_SIZE; i.e., hand size required for additional points)
     returns: int >= 0
     """
-    # TO DO ... <-- Remove this comment when you code this function
+    try:
+        word_score = sum([SCRABBLE_LETTER_VALUES[letter.lower()] for letter in word]) * len(word)
+        if len(word) == n:
+            word_score += 50
+        return word_score
+    except ValueError:
+        print("Invalid character")
 
 
 #
@@ -145,7 +150,14 @@ def update_hand(hand, word):
     hand: dictionary (string -> int)    
     returns: dictionary (string -> int)
     """
-    # TO DO ... <-- Remove this comment when you code this function
+    assert isinstance(hand, dict), "Hand must be a dictionary."
+    assert isinstance(word, str), "Word must be a string."
+
+    letter_number = {letter:word.count(letter) for letter in word}
+    new_hand = hand.copy()
+    new_hand = {key: hand[key] - letter_number.get(key, 0) for key in new_hand.keys()}
+    #assert all(value >= 0 for value in new_hand.values()), "Values in new_hand cannot be negative"
+    return new_hand
 
 
 #
@@ -162,7 +174,15 @@ def is_valid_word(word, hand, word_list):
     hand: dictionary (string -> int)
     word_list: list of lowercase strings
     """
-    # TO DO ... <-- Remove this comment when you code this function
+    assert isinstance(word, str), "Word must be a string."
+    assert isinstance(hand, dict), "Hand must be a dictionary."
+    assert isinstance(word_list, list), "Word_list must be a list."
+
+    letter_number = {letter:word.count(letter) for letter in word}
+    if word in word_list:
+        return all(key in hand.keys() for key in letter_number.keys()) and all(value <= hand[key] for key, value in letter_number.items())
+    else:
+        return False
 
 
 #
@@ -176,7 +196,7 @@ def calculate_hand_len(hand):
     hand: dictionary (string-> int)
     returns: integer
     """
-    # TO DO... <-- Remove this comment when you code this function
+    return sum(hand.values())
 
 
 def play_hand(hand, word_list, n):
@@ -201,33 +221,40 @@ def play_hand(hand, word_list, n):
       n: integer (HAND_SIZE; i.e., hand size required for additional points)
 
     """
-    # BEGIN PSEUDOCODE <-- Remove this comment when you code this function; do your coding within the pseudocode (leaving those comments in-place!)
+    assert isinstance(hand, dict), "Hand must be a dictionary."
+    assert isinstance(word_list, list), "Word_list must be a list."
+    assert isinstance(n, int), "n must be an integer."
+
     # Keep track of the total score
-
+    total_score = 0
     # As long as there are still letters left in the hand:
-
+    while any(value > 0 for value in hand.values()):
     # Display the hand
-
+        print(f'Current Hand: {" ".join(hand.keys())}')
     # Ask user for input
-
+        word_input = input('Enter word, or a "." to indicate that you are finished: ')
     # If the input is a single period:
-
+        if word_input == ".":
     # End the game (break out of the loop)
-
+            print("Goodbye! ", end="")
+            break
     # Otherwise (the input is not a single period):
-
+        else:
     # If the word is not valid:
-
+            if not is_valid_word(word_input, hand, word_list):
     # Reject invalid word (print a message followed by a blank line)
-
+                print("Invalid word, please try again\n")
     # Otherwise (the word is valid):
-
+            else:
     # Tell the user how many points the word earned, and the updated total score, in one line followed by a blank line
-
+                total_score += get_word_score(word_input, n)
+                print(f'"{word_input}" earned {get_word_score(word_input, n)} points. Total: {total_score} points\n')
+                if len(word_input) == n:
+                    print('Run out of letters.', end="")
     # Update the hand
-
+            hand = update_hand(hand, word_input)
     # Game is over (user entered a '.' or ran out of letters), so tell user the total score
-
+    print(f"Total score: {total_score} points.\n")
 
 #
 # Problem #5: Playing a game
@@ -245,10 +272,18 @@ def play_game(word_list):
 
     2) When done playing the hand, repeat from step 1    
     """
-    # TO DO ... <-- Remove this comment when you code this function
-    # <-- Remove this line when you code the function
-    print("play_game not yet implemented.")
-
+    while True:
+        instruction = input('Enter n to deal a new hand, r to replay the last hand, or e to end game: ')
+        match instruction:
+            case "n": 
+                hand = deal_hand(HAND_SIZE)
+                play_hand(hand, word_list, HAND_SIZE)
+            case "r":
+                play_hand(hand, word_list, HAND_SIZE)
+            case "e":
+                break
+            case _:
+                print("Invalid command.")
 
 #
 # Build data structures used for entire session and play game
