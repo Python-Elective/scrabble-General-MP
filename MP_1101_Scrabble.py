@@ -70,13 +70,10 @@ def get_word_score(word, n):
     n: integer (HAND_SIZE; i.e., hand size required for additional points)
     returns: int >= 0
     """
-    try:
-        word_score = sum([SCRABBLE_LETTER_VALUES[letter.lower()] for letter in word]) * len(word)
-        if len(word) == n:
-            word_score += 50
-        return word_score
-    except ValueError:
-        print("Invalid character")
+    word_score = sum([SCRABBLE_LETTER_VALUES[letter.lower()] for letter in word]) * len(word)
+    if len(word) == n:
+        word_score += 50
+    return word_score
 
 
 #
@@ -157,7 +154,9 @@ def update_hand(hand, word):
     new_hand = hand.copy()
     new_hand = {key: hand[key] - letter_number.get(key, 0) for key in new_hand.keys()}
     #assert all(value >= 0 for value in new_hand.values()), "Values in new_hand cannot be negative"
+    new_hand = {letter: repeat for letter, repeat in new_hand.items() if repeat > 0}
     return new_hand
+    
 
 
 #
@@ -279,7 +278,11 @@ def play_game(word_list):
                 hand = deal_hand(HAND_SIZE)
                 play_hand(hand, word_list, HAND_SIZE)
             case "r":
-                play_hand(hand, word_list, HAND_SIZE)
+                try:
+                    play_hand(hand, word_list, HAND_SIZE)
+                except UnboundLocalError:
+                    print("Last hand unavailable. Please play a hand first.")
+                    pass
             case "e":
                 break
             case _:
