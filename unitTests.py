@@ -1,4 +1,4 @@
-from Scrabble import *
+from MP_1101_Scrabble import *
 
 #
 # Test code
